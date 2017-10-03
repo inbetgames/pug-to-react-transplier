@@ -33,8 +33,15 @@ const transformAttrs = (attrs, key) => {
             }
           break;
         case "style":
-          var lexemes = attrs[i].val.split(/,/).map((l) => l.split(/: /));
-          console.log(lexemes);
+          var styles = {};
+          attrs[i].val
+            .replace(/^"/, "").replace(/"$/, "")
+            .split(/,/).map((l) => l.split(/: /))
+            .forEach((p) => {
+              styles[p[0]] = p[1];
+            });
+          console.log(JSON.stringify(styles));
+          attrsObject["style"] = styles;
           break;
         default:
             attrsObject[attrs[i].name] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
