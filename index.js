@@ -6,15 +6,25 @@ const fs = require('fs');
 const path = require('path');
 
 const rootfname = "../../javascript/azartcasino/src/app/views/index.jade";
+//const rootfname = "test.jade";
 
 var mixins_defined = {};
 var mixins = ["const f = React.createElement;",
               "const pugConditional = (test, consequent, alternate) => {if (test) { return consequent; } else { return alternate; }}"];
-const transformAttrs = (attrs) => {
+const transformAttrs = (attrs, key) => {
   var attrsObject = {};
   for (var i = 0; i < attrs.length; i++) {
     if (typeof(attrs[i].val) === "string") {
       switch (attrs[i].name) {
+        case "for":
+          attrsObject["htmlFor"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+          break;
+        case "charset":
+          attrsObject["charSet"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+          break;
+        case "http-equiv":
+          attrsObject["httpEquiv"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+          break;
         case "class":
             if (attrsObject["className"] !== undefined) {
               attrsObject["className"] = attrsObject["className"] + " " + attrs[i].val.replace(/^'/, "").replace(/'$/, "");
@@ -33,6 +43,9 @@ const transformAttrs = (attrs) => {
       attrsObject[attrs[i].name] = attrs[i].val;
     }
   }
+  if (key !== undefined) {
+    attrsObject.key = key;
+  }
   return JSON.stringify(attrsObject);
 }
 
@@ -46,17 +59,17 @@ const compiler = (node, opts) => {
       var childs = compiler(node.block, {depth: opts.depth + 1, fname: opts.fname});
       if (childs !== "") {
         return "f('" + node.name + "', "
-                                      + transformAttrs(node.attrs) + ", "
+                                      + transformAttrs(node.attrs, opts.key) + ", "
                                       + compiler(node.block, {depth: opts.depth + 1, fname: opts.fname}) +  ")";
       } else {
         return "f('" + node.name + "', "
-                                      + transformAttrs(node.attrs) + ")";
+                                      + transformAttrs(node.attrs, opts.key) + ")";
       }
       break;
     case "Block":
-      var blockResult = node.nodes.map((n) => compiler(n, {depth: opts.depth + 1, fname: opts.fname})).filter((l) => l != "").join(",\n" + t);
+      var blockResult = node.nodes.map((n, i) => compiler(n, {depth: opts.depth + 1, fname: opts.fname, key: i})).filter((l) => l != "").join(",\n" + t);
       if (blockResult != "") {
-        return ((blockResult[0] !== "'")?"\n" + t:"") + blockResult;
+        return ((blockResult[0] !== "'")?"\n" + t:"") + "[" + blockResult + "]";
       }
       return "";
     case "Text":
@@ -68,7 +81,7 @@ const compiler = (node, opts) => {
                 + compiler(node.consequent, {depth: opts.depth + 1, fname: opts.fname}) + ", "
                 + compiler(node.alternate, {depth: opts.depth + 1, fname: opts.fname}) + ")";
     case "Each":
-      var codeBlock = compiler(node.block, {depth: opts.depth + 2, fname: opts.fname});
+      var codeBlock = compiler(node.block, {depth: opts.depth + 2, fname: opts.fname, key: node.key});
       return "(() => { for (var " + node.key + " in " + node.obj + ") { var " + node.val + " = " + node.obj + "[" + node.key + "]; return (" + codeBlock + ");}})()"
     case "RawInclude":
       const basepath = path.parse(opts.fname).dir + "/" + node.file.path + ".jade";
