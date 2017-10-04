@@ -152,7 +152,7 @@ const recompile = () => {
     if (argv.out !== undefined) {
       fs.writeFileSync(argv.out, result.result);
       console.log("saved " + argv.out);
-      need2process = argv.watch;
+
       if (argv.watch) {
         result.files.map((el, i) => {
           if (watches[el] === undefined) {
