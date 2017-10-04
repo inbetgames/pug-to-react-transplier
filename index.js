@@ -7,13 +7,13 @@ const lodash = require('lodash');
 const watch = require('node-watch');
 
 const transplier = (fname) => {
-  var mixins_defined = {};
-  var files = [];
-  var mixins = ["const f = React.createElement;",
+  let mixins_defined = {};
+  let files = [];
+  let mixins = ["const f = React.createElement;",
                 "const pugConditional = (test, consequent, alternate) => {if (test) { return consequent; } else { return alternate; }}"];
   const transformAttrs = (attrs, key) => {
-    var attrsObject = {};
-    for (var i = 0; i < attrs.length; i++) {
+    let attrsObject = {};
+    for (let i = 0; i < attrs.length; i++) {
       if (typeof(attrs[i].val) === "string") {
         switch (attrs[i].name) {
           case "for":
@@ -33,7 +33,7 @@ const transplier = (fname) => {
               }
             break;
           case "style":
-            var styles = {};
+            let styles = {};
             attrs[i].val
               .replace(/^"/, "").replace(/"$/, "")
               .split(/,/).map((l) => l.split(/: /))
@@ -59,16 +59,16 @@ const transplier = (fname) => {
       attrsObject.key = key;
     }
     return JSON.stringify(attrsObject);
-  }
+  };
 
   const compiler = (node, opts) => {
     if (node === undefined) return "";
     if (node === null) return "null";
-    var t = "";
-    for (var i = 0; i < opts.depth; i++) { t = t + "   "; }
+    let t = "";
+    for (let i = 0; i < opts.depth; i++) { t = t + "   "; }
     switch (node.type) {
       case "Tag":
-        var childs = compiler(node.block, {depth: opts.depth + 1, fname: opts.fname});
+        let childs = compiler(node.block, {depth: opts.depth + 1, fname: opts.fname});
         if (childs !== "") {
           return "f('" + node.name + "', "
                                         + transformAttrs(node.attrs, opts.key) + ", "
@@ -79,8 +79,8 @@ const transplier = (fname) => {
         }
         break;
       case "Block":
-        var blockResult = node.nodes.map((n, i) => compiler(n, {depth: opts.depth + 1, fname: opts.fname, key: i})).filter((l) => l != "").join(",\n" + t);
-        if (blockResult != "") {
+        let blockResult = node.nodes.map((n, i) => compiler(n, {depth: opts.depth + 1, fname: opts.fname, key: i})).filter((l) => l != "").join(",\n" + t);
+        if (blockResult !== "") {
           return ((blockResult[0] !== "'")?"\n" + t:"") + "[" + blockResult + "]";
         }
         return "";
@@ -93,7 +93,7 @@ const transplier = (fname) => {
                   + compiler(node.consequent, {depth: opts.depth + 1, fname: opts.fname}) + ", "
                   + compiler(node.alternate, {depth: opts.depth + 1, fname: opts.fname}) + ")";
       case "Each":
-        var codeBlock = compiler(node.block, {depth: opts.depth + 2, fname: opts.fname, key: node.key});
+        let codeBlock = compiler(node.block, {depth: opts.depth + 2, fname: opts.fname, key: node.key});
         return "(() => { for (var " + node.key + " in " + node.obj + ") { var " + node.val + " = " + node.obj + "[" + node.key + "]; return (" + codeBlock + ");}})()"
       case "RawInclude":
         const basepath = path.parse(opts.fname).dir + "/" + node.file.path + ".jade";
@@ -105,10 +105,10 @@ const transplier = (fname) => {
         if (node.call) {
           return node.name + "(" + node.args + ")";
         } else {
-          var mixin =
+          let mixin =
             "// " + node.name + "\n" +
             "const " + node.name + " = (" + (node.args===null?"":node.args) + ") => [" + compiler(node.block, {depth: 1, fname: opts.fname}) + "]";
-          if (mixins_defined[node.name] == null) {
+          if (mixins_defined[node.name] === null) {
             mixins.push(mixin);
             mixins_defined[node.name] = true;
           }
@@ -120,20 +120,20 @@ const transplier = (fname) => {
         console.log("unknown node type: ", node);
         process.exit(-1);
     }
-  }
+  };
 
   const transform = (rootfname) => {
     files.push(rootfname);
-    var text = fs.readFileSync(rootfname).toString();
-    var ast = parse(lex(text));
+    let text = fs.readFileSync(rootfname).toString();
+    let ast = parse(lex(text));
 
     return "export default function template(content) {\n return (" + compiler(ast, {depth: 0, fname: rootfname}) + ")\n}";
-  }
+  };
 
   const transform_result = transform(fname);
   const result = "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transform_result;
   return {result: result, files: lodash.uniq(files)}
-}
+};
 
 
 const argv = optimist
@@ -144,7 +144,7 @@ const argv = optimist
     .describe('watch', 'if given will start watching for changes... out should be set!!!')
     .argv;
 
-var watches = {}
+let watches = {};
 
 const recompile = () => {
   if (argv.in !== undefined) {
@@ -169,6 +169,6 @@ const recompile = () => {
   } else {
     console.log("no input file given.");
   }
-}
+};
 
 recompile();
