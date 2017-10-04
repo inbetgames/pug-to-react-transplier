@@ -129,7 +129,7 @@ const transplier = (fname) => {
 }
 
 
-const argv = require('optimist')
+const argv = optimist
     .usage('Usage: $0 --in=inputfile --out=outfile')
     .demand(['in'])
     .describe('in', 'input file')
