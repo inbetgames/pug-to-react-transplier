@@ -11,6 +11,16 @@ const transplier = (fname) => {
   let files = [];
   let mixins = ["const f = React.createElement;",
                 "const pugConditional = (test, consequent, alternate) => {if (test) { return consequent; } else { return alternate; }}"];
+
+  const stringifyBetter = (obj) => {
+    let result = []
+    for (k in obj) {
+      result.push('"' + k.toString() + '": ' + obj[k].toString());
+    }
+
+    return "{" + result.join(", ") + "}";
+  };
+
   const transformAttrs = (attrs, key) => {
     let attrsObject = {};
     for (let i = 0; i < attrs.length; i++) {
@@ -50,11 +60,14 @@ const transplier = (fname) => {
             break;
           default:
               let value = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
-              if (value.match(/^"#{.*}$/)) {
+              if (value.match(/^"#{.*}"$/)) {
                 value = value.replace(/^"/, "").replace(/"$/, "");
                 value = value.match(/^#{(.*)}$/)[1];
+                attrsObject[attrs[i].name] = value;
+              } else {
+
+                attrsObject[attrs[i].name] = '"' + value.replace(/^"/, "").replace(/"$/, "") + '"';
               }
-              attrsObject[attrs[i].name] = value;
         }
       } else {
         attrsObject[attrs[i].name] = attrs[i].val;
@@ -63,7 +76,7 @@ const transplier = (fname) => {
     if (key !== undefined) {
       attrsObject.key = key;
     }
-    return JSON.stringify(attrsObject);
+    return stringifyBetter(attrsObject);
   };
 
   const compiler = (node, opts) => {
