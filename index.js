@@ -49,7 +49,12 @@ const transplier = (fname) => {
             attrsObject["style"] = styles;
             break;
           default:
-              attrsObject[attrs[i].name] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+              let value = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+              if (value.match(/^"#{.*}$/)) {
+                value = value.replace(/^"/, "").replace(/"$/, "");
+                value = value.match(/^#{(.*)}$/)[1];
+              }
+              attrsObject[attrs[i].name] = value;
         }
       } else {
         attrsObject[attrs[i].name] = attrs[i].val;
