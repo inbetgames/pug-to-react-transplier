@@ -38,7 +38,13 @@ const transplier = (fname) => {
               .replace(/^"/, "").replace(/"$/, "")
               .split(/,/).map((l) => l.split(/: /))
               .forEach((p) => {
-                styles[p[0]] = p[1];
+                switch (p[0]) {
+                  case "background-image":
+                    styles["backgroundImage"] = p[1];
+                    break;
+                  default:
+                    styles[p[0]] = p[1];
+                }
               });
             attrsObject["style"] = styles;
             break;
@@ -124,7 +130,8 @@ const transplier = (fname) => {
     return "export default function template(content) {\n return (" + compiler(ast, {depth: 0, fname: rootfname}) + ")\n}";
   }
 
-  const result = "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transform(fname);
+  const transform_result = transform(fname);
+  const result = "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transform_result;
   return {result: result, files: lodash.uniq(files)}
 }
 
