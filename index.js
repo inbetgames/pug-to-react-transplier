@@ -73,7 +73,7 @@ const transplier = (fname) => {
         attrsObject[attrs[i].name] = attrs[i].val;
       }
     }
-    if (key !== undefined) {
+    if (key !== undefined && attrsObject.key === undefined) {
       attrsObject.key = key;
     }
     return stringifyBetter(attrsObject);
