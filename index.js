@@ -3,9 +3,12 @@ const parse = require('pug-parser');
 const fs = require('fs');
 const path = require('path');
 const optimist = require('optimist');
+const lodash = require('lodash');
+const watch = require('node-watch');
 
 const transplier = (fname) => {
   var mixins_defined = {};
+  var files = [];
   var mixins = ["const f = React.createElement;",
                 "const pugConditional = (test, consequent, alternate) => {if (test) { return consequent; } else { return alternate; }}"];
   const transformAttrs = (attrs, key) => {
@@ -88,6 +91,7 @@ const transplier = (fname) => {
         return "(() => { for (var " + node.key + " in " + node.obj + ") { var " + node.val + " = " + node.obj + "[" + node.key + "]; return (" + codeBlock + ");}})()"
       case "RawInclude":
         const basepath = path.parse(opts.fname).dir + "/" + node.file.path + ".jade";
+        files.push(basepath);
         return compiler(parse(lex(fs.readFileSync(basepath).toString())), {depth: opts.depth + 1, fname: basepath});
       case "Comment":
         return "";
@@ -113,13 +117,15 @@ const transplier = (fname) => {
   }
 
   const transform = (rootfname) => {
+    files.push(rootfname);
     var text = fs.readFileSync(rootfname).toString();
     var ast = parse(lex(text));
 
     return "export default function template(content) {\n return (" + compiler(ast, {depth: 0, fname: rootfname}) + ")\n}";
   }
 
-  return "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transform(rootfname);
+  const result = "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transform(fname);
+  return {result: result, files: lodash.uniq(files)}
 }
 
 
@@ -128,14 +134,34 @@ const argv = require('optimist')
     .demand(['in'])
     .describe('in', 'input file')
     .describe('out', 'file to write output to, or stdout if skipped')
+    .describe('watch', 'if given will start watching for changes... out should be set!!!')
     .argv;
-if (argv.in !== undefined) {
-  const result = transplier(argv.in);
-  if (argv.out !== undefined) {
-    fs.writeFileSync(argv.out, result);
+
+var watches = {}
+
+const recompile = () => {
+  if (argv.in !== undefined) {
+    const result = transplier(argv.in);
+    if (argv.out !== undefined) {
+      fs.writeFileSync(argv.out, result.result);
+      console.log("saved " + argv.out);
+      need2process = argv.watch;
+      if (argv.watch) {
+        result.files.map((el, i) => {
+          if (watches[el] === undefined) {
+            watches[el] = watch(el, (evt, name) => {
+                console.log(evt, name);
+                recompile();
+            })
+          }
+        })
+      }
+    } else {
+      console.log(result.result);
+    }
   } else {
-    console.log(result);
+    console.log("no input file given.");
   }
-} else {
-  console.log("no input file given.");
 }
+
+recompile();
