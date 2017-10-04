@@ -9,13 +9,21 @@ const watch = require('node-watch');
 const transplier = (fname) => {
   let mixins_defined = {};
   let files = [];
-  let mixins = ["const f = React.createElement;",
-                "const pugConditional = (test, consequent, alternate) => {if (test) { return consequent; } else { return alternate; }}"];
+  let mixins = [];
 
   const stringifyBetter = (obj) => {
     let result = []
     for (k in obj) {
-      result.push('"' + k.toString() + '": ' + obj[k].toString());
+        switch (k) {
+            case "className":
+                result.push('"' + k.toString() + '": "' + obj[k].toString() + '"');
+                break;
+            case "style":
+                result.push('"' + k.toString() + '":' + JSON.stringify(obj[k]));
+                break;
+            default:
+                result.push('"' + k.toString() + '": ' + obj[k].toString());
+        }
     }
 
     return "{" + result.join(", ") + "}";
@@ -88,11 +96,11 @@ const transplier = (fname) => {
       case "Tag":
         let childs = compiler(node.block, {depth: opts.depth + 1, fname: opts.fname});
         if (childs !== "") {
-          return "f('" + node.name + "', "
+          return "React.createElement('" + node.name + "', "
                                         + transformAttrs(node.attrs, opts.key) + ", "
                                         + compiler(node.block, {depth: opts.depth + 1, fname: opts.fname}) +  ")";
         } else {
-          return "f('" + node.name + "', "
+          return "React.createElement('" + node.name + "', "
                                         + transformAttrs(node.attrs, opts.key) + ")";
         }
         break;
@@ -107,7 +115,7 @@ const transplier = (fname) => {
       case "Doctype":
         return "";
       case "Conditional":
-        return "pugConditional(" + node.test + ", "
+        return "((test, consequent, alternate) => {if (test) { return consequent; } else { return alternate; }})(" + node.test + ", "
                   + compiler(node.consequent, {depth: opts.depth + 1, fname: opts.fname}) + ", "
                   + compiler(node.alternate, {depth: opts.depth + 1, fname: opts.fname}) + ")";
       case "Each":
@@ -126,7 +134,7 @@ const transplier = (fname) => {
           let mixin =
             "// " + node.name + "\n" +
             "const " + node.name + " = (" + (node.args===null?"":node.args) + ") => [" + compiler(node.block, {depth: 1, fname: opts.fname}) + "]";
-          if (mixins_defined[node.name] === null) {
+          if (mixins_defined[node.name] === undefined) {
             mixins.push(mixin);
             mixins_defined[node.name] = true;
           }
