@@ -19,7 +19,7 @@ const transplier = (fname) => {
                 result.push('"' + k.toString() + '": "' + obj[k].toString() + '"');
                 break;
             case "style":
-                result.push('"' + k.toString() + '":' + JSON.stringify(obj[k]));
+                result.push('"' + k.toString() + '":' + stringifyBetter(obj[k]));
                 break;
             default:
                 result.push('"' + k.toString() + '": ' + obj[k].toString());
@@ -28,6 +28,34 @@ const transplier = (fname) => {
 
     return "{" + result.join(", ") + "}";
   };
+
+  const interpolation = (example) => {
+    console.log("processing: ", example);
+    example = example.replace(/^"/, "").replace(/"$/, "");
+    let inTemplate = false;
+    let templateBody = "";
+    let result = "";
+    for (var i = 0; i < example.length; i++) {
+      if (example[i] === "#" && example[i + 1] === "{" && !inTemplate) {
+        inTemplate = true;
+        templateBody = "";
+      } else
+      if (inTemplate && example[i] === "}") {
+          inTemplate = false;
+          result = result + '" +' + templateBody + ' + "';
+      } else
+      if (inTemplate) {
+        if (templateBody !== "") {
+          templateBody = templateBody + example[i];
+        } else {
+          templateBody = " ";
+        }
+      } else {
+        result = result + example[i];
+      }
+    }
+    return '"' + result + '"';
+  }
 
   const transformAttrs = (attrs, key) => {
     let attrsObject = {};
@@ -58,7 +86,7 @@ const transplier = (fname) => {
               .forEach((p) => {
                 switch (p[0]) {
                   case "background-image":
-                    styles["backgroundImage"] = p[1].replace(';', '');
+                    styles["backgroundImage"] = interpolation(p[1]).replace(';', '');
                     break;
                   default:
                     styles[p[0]] = p[1];
@@ -73,7 +101,6 @@ const transplier = (fname) => {
                 value = value.match(/^#{(.*)}$/)[1];
                 attrsObject[attrs[i].name] = value;
               } else {
-
                 attrsObject[attrs[i].name] = '"' + value.replace(/^"/, "").replace(/"$/, "") + '"';
               }
         }
