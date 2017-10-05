@@ -66,27 +66,29 @@ const transplier = (fname) => {
       if (typeof(attrs[i].val) === "string") {
         const name = attrs[i].name;
         const value = unquote(attrs[i].val);
+        const quoted = value != attrs[i].val;
+        const pattern = quoted ? `"${value}"` : value;
         switch (name) {
           case "checked":
             if (value === 'checked') {
-              attrsObject["defaultChecked"] = `"${value}"`;
+              attrsObject["defaultChecked"] = pattern;
             } else {
               // FIXME: same as in default case
               if (value.match(/^"#{.*}"$/)) {
                 attrsObject[attrs[i].name] = unquote(value).match(/^#{(.*)}$/);
               } else {
-                attrsObject[attrs[i].name] = `"${value}"`;
+                attrsObject[attrs[i].name] = pattern;
               }
             }
             break;
           case "for":
-            attrsObject["htmlFor"] = `"${value}"`;
+            attrsObject["htmlFor"] = pattern;
             break;
           case "charset":
-            attrsObject["charSet"] = `"${value}"`;
+            attrsObject["charSet"] = pattern;
             break;
           case "http-equiv":
-            attrsObject["httpEquiv"] = `"${value}"`;
+            attrsObject["httpEquiv"] = pattern;
             break;
           case "class":
               if (attrsObject["className"] !== undefined) {
@@ -114,7 +116,7 @@ const transplier = (fname) => {
               if (value.match(/^#{.*}$/)) {
                 attrsObject[attrs[i].name] = unquote(value).match(/^#{(.*)}$/);
               } else {
-                attrsObject[attrs[i].name] = `"${value}"`;
+                attrsObject[attrs[i].name] = pattern;
               }
         }
       } else {
