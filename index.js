@@ -58,7 +58,7 @@ const transplier = (fname) => {
               .forEach((p) => {
                 switch (p[0]) {
                   case "background-image":
-                    styles["backgroundImage"] = p[1];
+                    styles["backgroundImage"] = p[1].replace(';', '');
                     break;
                   default:
                     styles[p[0]] = p[1];
