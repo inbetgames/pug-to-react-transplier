@@ -148,9 +148,15 @@ const transplier = (fname) => {
         return "((test, consequent, alternate) => {if (test) { return consequent; } else { return alternate; }})(" + node.test + ", "
                   + compiler(node.consequent, {depth: opts.depth + 1, fname: opts.fname}) + ", "
                   + compiler(node.alternate, {depth: opts.depth + 1, fname: opts.fname}) + ")";
+
       case "Each":
         let codeBlock = compiler(node.block, {depth: opts.depth + 2, fname: opts.fname, key: node.key});
-        return "(() => { for (var " + node.key + " in " + node.obj + ") { var " + node.val + " = " + node.obj + "[" + node.key + "]; return (" + codeBlock + ");}})()"
+
+        if (node.key)
+          return "(() => { for (var " + node.key + " in " + node.obj + ") { var " + node.val + " = " + node.obj + "[" + node.key + "]; return (" + codeBlock + ");}})()";
+        else
+          return "(() => { if (!" +node.obj+ ") return null; return "+node.obj+".map(("+node.val+") => { return "+codeBlock.trim()+"; });})()";
+
       case "RawInclude":
         const basepath = path.parse(opts.fname).dir + "/" + node.file.path + ".jade";
         files.push(basepath);
