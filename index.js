@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const lex = require('pug-lexer');
 const parse = require('pug-parser');
 const fs = require('fs');
