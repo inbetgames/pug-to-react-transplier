@@ -34,6 +34,8 @@ const transplier = (fname) => {
     for (let i = 0; i < attrs.length; i++) {
       if (typeof(attrs[i].val) === "string") {
         switch (attrs[i].name) {
+          case "checked":
+            attrsObject["defaultChecked"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
           case "for":
             attrsObject["htmlFor"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
             break;
