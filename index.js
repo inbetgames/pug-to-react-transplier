@@ -58,33 +58,46 @@ const transplier = (fname) => {
     return '"' + result + '"';
   }
 
+  const unquote= v => v.replace(/['"](.*)['"]/, '$1');
+
   const transformAttrs = (attrs, key) => {
     let attrsObject = {};
     for (let i = 0; i < attrs.length; i++) {
       if (typeof(attrs[i].val) === "string") {
-        switch (attrs[i].name) {
+        const name = attrs[i].name;
+        const value = unquote(attrs[i].val);
+        switch (name) {
           case "checked":
-            attrsObject["defaultChecked"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+            if (value === 'checked') {
+              attrsObject["defaultChecked"] = `"${value}"`;
+            } else {
+              // FIXME: same as in default case
+              if (value.match(/^"#{.*}"$/)) {
+                attrsObject[attrs[i].name] = unquote(value).match(/^#{(.*)}$/);
+              } else {
+                attrsObject[attrs[i].name] = `"${value}"`;
+              }
+            }
+            break;
           case "for":
-            attrsObject["htmlFor"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+            attrsObject["htmlFor"] = `"${value}"`;
             break;
           case "charset":
-            attrsObject["charSet"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+            attrsObject["charSet"] = `"${value}"`;
             break;
           case "http-equiv":
-            attrsObject["httpEquiv"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+            attrsObject["httpEquiv"] = `"${value}"`;
             break;
           case "class":
               if (attrsObject["className"] !== undefined) {
-                attrsObject["className"] = attrsObject["className"] + " " + attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+                attrsObject["className"] = attrsObject["className"] + " " + value;
               } else {
-                attrsObject["className"] = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
+                attrsObject["className"] = value;
               }
             break;
           case "style":
             let styles = {};
-            attrs[i].val
-              .replace(/^"/, "").replace(/"$/, "")
+            value
               .split(/,/).map((l) => l.split(/: /))
               .forEach((p) => {
                 switch (p[0]) {
@@ -98,13 +111,10 @@ const transplier = (fname) => {
             attrsObject["style"] = styles;
             break;
           default:
-              let value = attrs[i].val.replace(/^'/, "").replace(/'$/, "");
-              if (value.match(/^"#{.*}"$/)) {
-                value = value.replace(/^"/, "").replace(/"$/, "");
-                value = value.match(/^#{(.*)}$/)[1];
-                attrsObject[attrs[i].name] = value;
+              if (value.match(/^#{.*}$/)) {
+                attrsObject[attrs[i].name] = unquote(value).match(/^#{(.*)}$/);
               } else {
-                attrsObject[attrs[i].name] = '"' + value.replace(/^"/, "").replace(/"$/, "") + '"';
+                attrsObject[attrs[i].name] = `"${value}"`;
               }
         }
       } else {
