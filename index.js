@@ -137,13 +137,22 @@ const transplier = (fname) => {
     for (let i = 0; i < opts.depth; i++) { t = t + "   "; }
     switch (node.type) {
       case "Tag":
+        let name = "'" + node.name + "'";
+        if (node.name === "a") {
+          let href = node.attrs.filter(attr => (attr.name == "href" || attr.name == "to"))[0];
+          let external = node.attrs.filter(attr => attr.name == "external")[0];
+          if (href && !external && href.val !== '"#"') {
+              name = "content.Link";
+              href.name = "to";
+          }
+        }
         let childs = compiler(node.block, {depth: opts.depth + 1, fname: opts.fname});
         if (childs !== "") {
-          return "React.createElement('" + node.name + "', "
+          return "React.createElement(" + name + ", "
                                         + transformAttrs(node.attrs, opts.key) + ", "
                                         + compiler(node.block, {depth: opts.depth + 1, fname: opts.fname}) +  ")";
         } else {
-          return "React.createElement('" + node.name + "', "
+          return "React.createElement(" + name + ", "
                                         + transformAttrs(node.attrs, opts.key) + ")";
         }
         break;
