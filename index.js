@@ -30,7 +30,6 @@ const transplier = (fname) => {
   };
 
   const interpolation = (example) => {
-    console.log("processing: ", example);
     example = example.replace(/^"/, "").replace(/"$/, "");
     let inTemplate = false;
     let templateBody = "";
