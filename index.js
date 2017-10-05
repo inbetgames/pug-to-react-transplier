@@ -65,9 +65,10 @@ const transplier = (fname) => {
     for (let i = 0; i < attrs.length; i++) {
       if (typeof(attrs[i].val) === "string") {
         const name = attrs[i].name;
-        const value = unquote(attrs[i].val);
+        var value = unquote(attrs[i].val);
         const quoted = value != attrs[i].val;
         const pattern = quoted ? `"${value}"` : value;
+
         switch (name) {
           case "checked":
             if (value === 'checked') {
@@ -113,8 +114,8 @@ const transplier = (fname) => {
             attrsObject["style"] = styles;
             break;
           default:
-              if (value.match(/^#{.*}$/)) {
-                attrsObject[attrs[i].name] = unquote(value).match(/^#{(.*)}$/);
+              if (value.match(/#{.*}/)) {
+                attrsObject[attrs[i].name] = interpolation(value);
               } else {
                 attrsObject[attrs[i].name] = pattern;
               }
