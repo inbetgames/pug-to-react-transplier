@@ -72,14 +72,12 @@ const transplier = (fname) => {
       let val = attr.val;
       if (name === undefined) {
         name = attr.name;
-        // handle 'checked'='checked' case, it should be 'defaultChecked'
+        // handle 'checked'='checked' or true case, it should be 'defaultChecked'
         // note that react warns about defaultChecked only on uncontrolled inputs
-        if (
-          name === 'checked' &&
-          typeof val === 'string' &&
-          unquote(val) === 'checked'
-        ) {
-          name = 'defaultChecked';
+        if ( name === 'checked' ) {
+          if ((typeof(val) === 'string' && unquote(val) === 'checked') || val === true) {
+            name = 'defaultChecked';
+          }
         }
       }
       return { ...attr, name };
