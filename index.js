@@ -94,9 +94,7 @@ const transplier = (fname) => {
     for (let i = 0; i < attrs.length; i++) {
       if (typeof(attrs[i].val) === "string") {
         const name = attrs[i].name;
-        var value = unquote(attrs[i].val);
-        const quoted = value != attrs[i].val;
-        const pattern = quoted ? `"${value}"` : value;
+        const value = unquote(attrs[i].val);
 
         switch (name) {
           case "className":
@@ -125,7 +123,8 @@ const transplier = (fname) => {
               if (value.match(/#{.*}/)) {
                 attrsObject[attrs[i].name] = interpolation(value);
               } else {
-                attrsObject[attrs[i].name] = pattern;
+                const wasQuoted = value != attrs[i].val;
+                attrsObject[attrs[i].name] = wasQuoted ? `"${value}"` : value;
               }
         }
       } else {
