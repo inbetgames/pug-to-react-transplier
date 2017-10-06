@@ -98,9 +98,9 @@ const transplier = (fname) => {
         switch (name) {
           case "className":
               if (attrsObject["className"] !== undefined) {
-                attrsObject["className"] = attrsObject["className"] + " " + value;
+                attrsObject["className"] = attrsObject["className"] + " " + unquote(interpolation(value));
               } else {
-                attrsObject["className"] = value;
+                attrsObject["className"] = unquote(interpolation(value));
               }
             break;
           case "style":
