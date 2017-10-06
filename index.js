@@ -122,8 +122,12 @@ const transplier = (fname) => {
               if (value.match(/#{.*}/)) {
                 attrsObject[attrs[i].name] = interpolation(value);
               } else {
-                const wasQuoted = value != attrs[i].val;
-                attrsObject[attrs[i].name] = wasQuoted ? `"${value}"` : value;
+                const wasQuoted = value !== attrs[i].val;
+                if (attrs[i].val.charAt(0) != "\"" && attrs[i].val.charAt(0) != "'") {
+                    attrsObject[attrs[i].name] = attrs[i].val;
+                }else {
+                  attrsObject[attrs[i].name] = wasQuoted ? `"${value}"` : value;
+                }
               }
         }
       } else {
