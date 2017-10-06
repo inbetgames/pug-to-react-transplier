@@ -145,6 +145,8 @@ const transplier = (fname) => {
               name = "content.Link";
               href.name = "to";
           }
+        }else if (node.name.charAt(0) == node.name.charAt(0).toUpperCase()) {
+          name = "content." + node.name;
         }
         let childs = compiler(node.block, {depth: opts.depth + 1, fname: opts.fname});
         if (childs !== "") {
