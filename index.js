@@ -17,9 +17,6 @@ const transplier = (fname) => {
     let result = []
     for (k in obj) {
         switch (k) {
-            case "className":
-                result.push('"' + k.toString() + '": "' + obj[k].toString() + '"');
-                break;
             case "style":
                 result.push('"' + k.toString() + '":' + stringifyBetter(obj[k]));
                 break;
@@ -97,10 +94,15 @@ const transplier = (fname) => {
 
         switch (name) {
           case "className":
-              if (attrsObject["className"] !== undefined) {
-                attrsObject["className"] = attrsObject["className"] + " " + unquote(interpolation(value));
-              } else {
-                attrsObject["className"] = unquote(interpolation(value));
+              if (attrs[i].val.charAt(0) != "\"" && attrs[i].val.charAt(0) != "'") {
+                  attrsObject[attrs[i].name] = attrs[i].val;
+              }else {
+                  if (attrsObject["className"] !== undefined) {
+                      attrsObject["className"] = unquote(attrsObject["className"]) + " " + unquote(interpolation(value));
+                  } else {
+                      attrsObject["className"] = unquote(interpolation(value));
+                  }
+                  attrsObject["className"] = "\"" + attrsObject["className"] + "\"";
               }
             break;
           case "style":
