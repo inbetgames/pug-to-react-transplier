@@ -60,38 +60,42 @@ const transplier = (fname) => {
 
   const unquote= v => v.replace(/['"](.*)['"]/, '$1');
 
+  const renameSpecificAttrs = attrs => {
+    const renameMap = {
+      for: 'htmlFor',
+      charset: 'charSet',
+      'http-equiv': 'httpEquiv',
+      class: 'className',
+    };
+    return attrs.map(attr => {
+      let name = renameMap[attr.name];
+      let val = attr.val;
+      if (name === undefined) {
+        name = attr.name;
+        // handle 'checked'='checked' or true case, it should be 'defaultChecked'
+        // note that react warns about defaultChecked only on uncontrolled inputs
+        if ( name === 'checked' ) {
+          if ((typeof(val) === 'string' && unquote(val) === 'checked') || val === true) {
+            name = 'defaultChecked';
+          }
+        }
+      }
+      return { ...attr, name };
+    }, {});
+  };
+
   const transformAttrs = (attrs, key) => {
     let attrsObject = {};
+
+    attrs = renameSpecificAttrs(attrs);
+
     for (let i = 0; i < attrs.length; i++) {
       if (typeof(attrs[i].val) === "string") {
         const name = attrs[i].name;
-        var value = unquote(attrs[i].val);
-        const quoted = value != attrs[i].val;
-        const pattern = quoted ? `"${value}"` : value;
+        const value = unquote(attrs[i].val);
 
         switch (name) {
-          case "checked":
-            if (value === 'checked') {
-              attrsObject["defaultChecked"] = pattern;
-            } else {
-              // FIXME: same as in default case
-              if (value.match(/^"#{.*}"$/)) {
-                attrsObject[attrs[i].name] = unquote(value).match(/^#{(.*)}$/);
-              } else {
-                attrsObject[attrs[i].name] = pattern;
-              }
-            }
-            break;
-          case "for":
-            attrsObject["htmlFor"] = pattern;
-            break;
-          case "charset":
-            attrsObject["charSet"] = pattern;
-            break;
-          case "http-equiv":
-            attrsObject["httpEquiv"] = pattern;
-            break;
-          case "class":
+          case "className":
               if (attrsObject["className"] !== undefined) {
                 attrsObject["className"] = attrsObject["className"] + " " + value;
               } else {
@@ -117,7 +121,8 @@ const transplier = (fname) => {
               if (value.match(/#{.*}/)) {
                 attrsObject[attrs[i].name] = interpolation(value);
               } else {
-                attrsObject[attrs[i].name] = pattern;
+                const wasQuoted = value != attrs[i].val;
+                attrsObject[attrs[i].name] = wasQuoted ? `"${value}"` : value;
               }
         }
       } else {
