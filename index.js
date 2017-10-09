@@ -191,7 +191,8 @@ const transplier = (fname) => {
         if (node.key)
           return "(() => { for (var " + node.key + " in " + node.obj + ") { var " + node.val + " = " + node.obj + "[" + node.key + "]; return (" + codeBlock + ");}})()";
         else
-          return "(() => { if (!" +node.obj+ ") return null; return "+node.obj+".map(("+node.val+") => { return "+codeBlock.trim()+"; });})()";
+          return "(() => { try { let items = "+node.obj+"; } catch (e) { return null; };" +
+              "if (!" +node.obj+ ") return null; return "+node.obj+".map(("+node.val+") => { return "+codeBlock.trim()+"; });})()";
 
       case "RawInclude":
         const basepath = path.parse(opts.fname).dir + "/" + node.file.path + ".jade";
