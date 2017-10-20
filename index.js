@@ -8,6 +8,12 @@ const optimist = require('optimist');
 const lodash = require('lodash');
 const watch = require('node-watch');
 
+function isArray(arg) {
+  return 'function' == typeof Array.isArray
+    ? Array.isArray(arg)
+    : '[object Array]' == Object.prototype.toString.call(arg);
+}
+
 const transplier = (fname) => {
   let mixins_defined = {};
   let files = [];
@@ -17,6 +23,13 @@ const transplier = (fname) => {
     let result = []
     for (k in obj) {
         switch (k) {
+            case 'className':
+                if (isArray(obj[k])) {
+                    result.push('"' + k.toString() + '": [' + obj[k].join(',') + '].join(" ")');
+                } else {
+                    result.push('"' + k.toString() + '": ' + obj[k].toString());
+                }
+                break;
             case "style":
                 result.push('"' + k.toString() + '":' + stringifyBetter(obj[k]));
                 break;
@@ -95,12 +108,24 @@ const transplier = (fname) => {
         switch (name) {
           case "className":
               if (attrs[i].val.charAt(0) != "\"" && attrs[i].val.charAt(0) != "'") {
-                  attrsObject[attrs[i].name] = attrs[i].val;
-              }else {
-                  if (attrsObject["className"] !== undefined) {
-                      attrsObject["className"] = unquote(attrsObject["className"]) + " " + unquote(interpolation(value));
+                  // expressions?
+                  if (attrsObject["className"] === undefined) {
+                      // just one non-string value
+                      attrsObject["className"] = attrs[i].val;
                   } else {
+                      // some value is already in className, we must make array
+                      if (isArray(attrsObject["className"])) {
+                          attrsObject["className"] = attrsObject["className"].concat([attrs[i].val]);
+                      } else {
+                          attrsObject["className"] = [attrsObject["className"]].concat([attrs[i].val]);
+                      }
+                    }
+              } else {
+                  // simple string values
+                  if (attrsObject["className"] === undefined) {
                       attrsObject["className"] = unquote(interpolation(value));
+                  } else {
+                      attrsObject["className"] = unquote(attrsObject["className"]) + " " + unquote(interpolation(value));
                   }
                   attrsObject["className"] = "\"" + attrsObject["className"] + "\"";
               }
