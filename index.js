@@ -225,9 +225,13 @@ const transplier = (fname) => {
             });
           })()`;
         else
-          return "(() => { let items = []; try { items = "+node.obj+"; } catch (e) { return null; };" +
-              "if (!items) return null; return items.map(("+node.val+") => { return "+codeBlock.trim()+"; });})()";
-
+          return `
+          (() => {
+            let items = [];
+           try { items = ${node.obj}; } catch (e) { return null; }
+            if (!items) { return null; }
+            return items.map(${node.val} => ${codeBlock.trim()});
+          })()`;
       case "RawInclude":
         const basepath = path.parse(opts.fname).dir + "/" + node.file.path + ".jade";
         files.push(basepath);
