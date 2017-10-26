@@ -214,7 +214,16 @@ const transplier = (fname) => {
         let codeBlock = compiler(node.block, {depth: opts.depth + 2, fname: opts.fname, key: node.key});
 
         if (node.key)
-          return "(() => { for (var " + node.key + " in " + node.obj + ") { var " + node.val + " = " + node.obj + "[" + node.key + "]; return (" + codeBlock + ");}})()";
+          return `
+          (() => {
+            let items = [];
+            try { items = ${node.obj}; } catch (e) { return null; }
+            if (!items) { return null; }
+            return Object.keys(${node.obj}).map(${node.key} => {
+              let ${node.val} = ${node.obj}[${node.key}];
+              return ${codeBlock.trim()};
+            });
+          })()`;
         else
           return "(() => { let items = []; try { items = "+node.obj+"; } catch (e) { return null; };" +
               "if (!items) return null; return items.map(("+node.val+") => { return "+codeBlock.trim()+"; });})()";
