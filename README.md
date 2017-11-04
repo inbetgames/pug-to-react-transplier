@@ -2,7 +2,14 @@
 Pug Musings - is a console utility to convert Pug templates to ready to use React components.
 
 ## Installation
-To install Pug Musings as global package run following command:  
+To install Pug Musings as global package run following command:
+
+### Yarn  
+```
+yarn global add pug-musings
+```
+
+### npm  
 ```
 npm install pug-musings -g
 ```
