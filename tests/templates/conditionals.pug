@@ -1,0 +1,12 @@
+#user
+    if content.user.description
+        h2.green Description
+        p.description= content.user.description
+    else if content.authorised
+        h2.blue Description
+        p.description.
+            User has no description,
+            why not add one...
+    else
+        h2.red Description
+        p.description User has no description
