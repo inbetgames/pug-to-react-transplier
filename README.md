@@ -22,4 +22,4 @@ npm test
 ```
 
 ## License
-[MIT License](https://github.com/inbetgames/pug-to-react-transplierissues/blob/master/LICENSE.md).
+[MIT License](https://github.com/inbetgames/pug-to-react-transplier/blob/master/LICENSE)
