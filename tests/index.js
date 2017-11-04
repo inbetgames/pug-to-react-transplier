@@ -8,21 +8,6 @@ const React = require('react');
 const ReactDOMServer = require('react-dom/server');
 const pug = require('pug');
 
-const data = {
-    name: 'Roman',
-    firstname: 'Roman',
-    secondname: 'Lubushkin',
-    user: {
-        description: "Description",
-        authorised: true
-    },
-    a: {
-      b: {
-          c: 'value'
-      }
-    }
-};
-
 describe('Pug to React transpiler tests', function () {
     const currentPath = path.resolve(__dirname);
     const testsPath = path.join(currentPath, 'templates');
@@ -32,10 +17,11 @@ describe('Pug to React transpiler tests', function () {
     it('All pug templates should be transpiled without errors', function (done) {
         files.map((file) => {
             if (!file.endsWith('.pug')) return;
-
+            const baseName = file.split('.pug')[0];
             const pubPath = path.join(testsPath, file);
-            const reactPath = path.join(testsPath, file.split('.pug')[0] + '.js');
-            const es5Path = path.join(testsPath, file.split('.pug')[0] + '.es5.js');
+            const reactPath = path.join(testsPath, baseName + '.js');
+            const es5Path = path.join(testsPath, baseName + '.es5.js');
+            const dataPath = path.join(testsPath, baseName + '.json');
             const command = 'node index.js --in ' + pubPath + ' --out ' + reactPath +
                 ' && ' +
                 'babel ' + reactPath + ' --out-file ' + es5Path + ' --presets=es2015,react';
@@ -48,7 +34,8 @@ describe('Pug to React transpiler tests', function () {
                     error: error,
                     stdout: stdout,
                     stderr: stderr,
-                    command: command
+                    command: command,
+                    data: dataPath
                 });
 
                 if (error) done(error);
@@ -61,6 +48,7 @@ describe('Pug to React transpiler tests', function () {
 
     it('All generated React components should have output equal to pug', function () {
         testingList.map(function (row) {
+            const data = fs.existsSync(row.data) ? JSON.parse(fs.readFileSync(row.data)) : null;
             const pagHtml = pug.renderFile(row.pug, {content: data}, undefined);
             const es5ComponentFunc = require(row.es5).default;
             const es5Component = React.createFactory(es5ComponentFunc);

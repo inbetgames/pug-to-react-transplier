@@ -2,13 +2,15 @@
 Pug Musings - is a console utility to convert Pug templates to ready to use React components.
 
 ## Installation
+To install Pug Musings as global package run following command:  
 ```
 npm install pug-musings -g
 ```
 
 ## Usage 
+Now you can use global name pug-musings to run transpiler: 
 ```
-Usage: pug-musings --in = path_to_pug_template --out = path_to_output_file
+pug-musings --in = path_to_pug_template --out = path_to_output_file
 
 Options:
   --in     Path to the target Pug template                                  
@@ -17,6 +19,7 @@ Options:
 ```
 
 ## Tests
+Tests are organized in pairs Pug template + template data in `tests/templates` folder and can be run as follows: 
 ```
 npm test
 ```
