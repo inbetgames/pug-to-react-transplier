@@ -4,8 +4,8 @@ const fs = require('fs');
 
 const template = process.argv[2];
 const currentPath = path.resolve(__dirname);
-const templatePath = path.join(currentPath, 'templates', template + '.pug');
-const dataPath = path.join(currentPath, 'templates', template + '.json');
+const templatePath = path.join(currentPath, 'automatic', template + '.pug');
+const dataPath = path.join(currentPath, 'automatic', template + '.json');
 
 const data = fs.existsSync(dataPath) ? JSON.parse(fs.readFileSync(dataPath)) : null;
 

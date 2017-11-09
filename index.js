@@ -18,6 +18,7 @@ const transplier = (fname) => {
     let mixins_defined = {};
     let files = [];
     let mixins = [];
+    let error = false;
 
     const stringifyBetter = (obj) => {
         let result = [];
@@ -266,9 +267,20 @@ const transplier = (fname) => {
         return "export default function template(content) {\n return (" + compiler(ast, {depth: 0, fname: rootfname}) + ")\n}";
     };
 
-    const transform_result = transform(fname);
-    const result = "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transform_result;
-    return {result: result, files: lodash.uniq(files)}
+    let transformResult = null;
+    try {
+        transformResult = transform(fname);
+    } catch (e) {
+        console.log(e.toString());
+        error = true;
+    }
+
+    const result = transformResult ? "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transformResult : null;
+    return {
+        result: result,
+        files: lodash.uniq(files),
+        error: error
+    }
 };
 
 
@@ -285,22 +297,25 @@ let watches = {};
 const recompile = () => {
     if (argv.in !== undefined) {
         const result = transplier(argv.in);
-        if (argv.out !== undefined) {
-            fs.writeFileSync(argv.out, result.result);
-            console.log("saved " + argv.out);
-
-            if (argv.watch) {
-                result.files.map((el, i) => {
-                    if (watches[el] === undefined) {
-                        watches[el] = watch(el, (evt, name) => {
-                            console.log(evt, name);
-                            recompile();
-                        })
-                    }
-                })
+        if (result.result) {
+            if (argv.out !== undefined) {
+                fs.writeFileSync(argv.out, result.result);
+                console.log("saved " + argv.out);
+            } else {
+                console.log(result.result);
             }
-        } else {
-            console.log(result.result);
+        }
+        if (argv.watch) {
+            result.files.map((el, i) => {
+                if (watches[el] === undefined) {
+                    watches[el] = watch(el, (evt, name) => {
+                        console.log(evt, name);
+                        recompile();
+                    })
+                }
+            })
+        } else if (result.error) {
+            process.exit(1);
         }
     } else {
         console.log("no input file given.");

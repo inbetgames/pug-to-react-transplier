@@ -10,7 +10,7 @@ const pug = require('pug');
 
 describe('Pug to React transpiler tests', function () {
     const currentPath = path.resolve(__dirname);
-    const testsPath = path.join(currentPath, 'templates');
+    const testsPath = path.join(currentPath, 'automaic');
     const files = fs.readdirSync(testsPath).filter(file => file.endsWith('.pug'));
     const testingList = [];
 
