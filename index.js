@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const optimist = require('optimist');
 const lodash = require('lodash');
+const beautify = require('js-beautify').js_beautify
 const watch = require('node-watch');
 
 /**
@@ -280,7 +281,7 @@ const transplier = (fname) => {
         let text = fs.readFileSync(rootfname).toString();
         let ast = parse(lex(text));
 
-        return "export default function template(content) {\n return (" + compiler(ast, {depth: 0, fname: rootfname}) + ")\n}";
+        return "export default function template(content) {return (" + compiler(ast, {depth: 0, fname: rootfname}) + ")}";
     };
 
     let transformResult = null;
@@ -291,7 +292,12 @@ const transplier = (fname) => {
         error = true;
     }
 
-    const result = transformResult ? "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transformResult : null;
+    let result = transformResult ? "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transformResult : null;
+
+    if (!argv['no_beautify']) {
+      result = beautify(result, { indent_size: 2 });
+    }
+
     return {
         result: result,
         files: lodash.uniq(files),
@@ -306,6 +312,7 @@ const argv = optimist
     .describe('in', 'Path to the target Pug template')
     .describe('out', 'Path to the output file, stdout will be used if missing')
     .describe('watch', 'If given will start watching for changes, out param is required')
+    .boolean('no_beautify', 'Prevent to beautify result')
     .argv;
 
 let watches = {};

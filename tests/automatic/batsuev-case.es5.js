@@ -13,7 +13,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function template(content) {
   return [(content.a && content.a.b ? function () {
-    return [_react2.default.createElement('div', { "key": 0 }, [content.a.b.c])];
+    return [_react2.default.createElement('div', {
+      "key": 0
+    }, [content.a.b.c])];
   } : function () {
     return null;
   })()];

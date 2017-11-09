@@ -1,6 +1,6 @@
 {
   "name": "pug-musings",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Pug Musings - is a console utility to convert Pug templates to ready to use React components.",
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
   "author": "https://inbetgames.com",
   "license": "MIT",
   "dependencies": {
+    "js-beautify": "^1.7.4",
     "lodash": "^4.17.4",
     "node-watch": "^0.5.5",
     "optimist": "^0.6.1",
