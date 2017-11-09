@@ -20,8 +20,8 @@ const transplier = (fname) => {
     let mixins = [];
 
     const stringifyBetter = (obj) => {
-        let result = []
-        for (k in obj) {
+        let result = [];
+        for (let k in obj) {
             switch (k) {
                 case 'className':
                     if (isArray(obj[k])) {

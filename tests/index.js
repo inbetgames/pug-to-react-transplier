@@ -44,11 +44,22 @@ describe('Pug to React transpiler tests', function () {
             });
 
         });
-    });
+    }).timeout(5000);
 
     it('All generated React components should have output equal to pug', function () {
         testingList.map(function (row) {
             const data = fs.existsSync(row.data) ? JSON.parse(fs.readFileSync(row.data)) : null;
+
+            // this hack allows to pass functions through json
+            if (data) {
+                for (let key in data) {
+                    let value = data[key];
+                    if (value.startsWith && value.startsWith('(function(){')) {
+                        data[key] = eval(value);
+                    }
+                }
+            }
+
             const pagHtml = pug.renderFile(row.pug, {content: data}, undefined);
             const es5ComponentFunc = require(row.es5).default;
             const es5Component = React.createFactory(es5ComponentFunc);

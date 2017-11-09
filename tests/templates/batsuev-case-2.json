@@ -1,0 +1,5 @@
+{
+  "condition": false,
+  "getA": "(function(){return function(){return 'testA'}})()",
+  "getB": "(function(){return function(){return 'testB'}})()"
+}
