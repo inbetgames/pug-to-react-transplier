@@ -10,7 +10,7 @@ const pug = require('pug');
 
 describe('Pug to React transpiler tests', function () {
     const currentPath = path.resolve(__dirname);
-    const testsPath = path.join(currentPath, 'automaic');
+    const testsPath = path.join(currentPath, 'automatic');
     const files = fs.readdirSync(testsPath).filter(file => file.endsWith('.pug'));
     const testingList = [];
 
@@ -67,7 +67,7 @@ describe('Pug to React transpiler tests', function () {
 
             assert.equal(row.error, null, 'Generation command is ok, ' + row.pug);
             assert.equal(row.stderr, '', 'No generation error occurred, ' + row.pug);
-            assert.equal(pagHtml, es5Html, 'Result HTML is equal, ' + row.pug + '\nUse following command transpile manually:\n' + row.command);
+            assert.equal(pagHtml, es5Html, 'Result HTML should be equal, ' + row.pug + '\nUse following command transpile manually:\n' + row.command);
         });
     });
 });

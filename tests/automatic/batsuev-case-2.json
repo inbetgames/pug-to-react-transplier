@@ -1,5 +1,5 @@
 {
   "condition": false,
-  "getA": "(function(){return function(){return alert('testA')}})()",
-  "getB": "(function(){return function(){return alert('testB')}})()"
+  "getA": "(function(){return function(){return 'testA'}})()",
+  "getB": "(function(){return function(){return 'testB'}})()"
 }

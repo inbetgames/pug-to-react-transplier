@@ -8,10 +8,25 @@ const optimist = require('optimist');
 const lodash = require('lodash');
 const watch = require('node-watch');
 
+/**
+ * @param {*} arg
+ * @returns {boolean}
+ */
 function isArray(arg) {
     return 'function' === typeof Array.isArray
         ? Array.isArray(arg)
         : '[object Array]' === Object.prototype.toString.call(arg);
+}
+
+/**
+ * @param  {string} template
+ * @param  {Array.<string>} values
+ * @return {string}
+ */
+function subs(template, values) {
+  return template.replace(/%s/g, function() {
+    return values.shift();
+  });
 }
 
 const transplier = (fname) => {
@@ -197,9 +212,9 @@ const transplier = (fname) => {
                 }
                 break;
             case "Block":
-                let blockResult = node.nodes.map((n, i) => compiler(n, {depth: opts.depth + 1, fname: opts.fname, key: i})).filter((l) => l != "").join(",\n" + t);
-                if (blockResult !== "") {
-                    return ((blockResult[0] !== "'") ? "\n" + t : "") + "[" + blockResult + "]";
+                let blockResult = node.nodes.map((n, i) => compiler(n, {depth: opts.depth + 1, fname: opts.fname, key: i})).filter((l) => l != "").join("," + t);
+                if (blockResult.length) {
+                    return ((blockResult[0] !== "'") ? "" : "") + "[" + blockResult + "]";
                 }
                 return "";
             case "Text":
@@ -207,12 +222,13 @@ const transplier = (fname) => {
             case "Doctype":
                 return "";
             case "Conditional":
-                return "((test, consequent, alternate) => {if (test) { return consequent; } else { return alternate; }})(" + node.test + ", "
-                    + compiler(node.consequent, {depth: opts.depth + 1, fname: opts.fname}) + ", "
-                    + compiler(node.alternate, {depth: opts.depth + 1, fname: opts.fname}) + ")";
+                return subs("((%s) ? function (){return %s;} : function (){return %s;})()", [
+                      node.test,
+                      compiler(node.consequent, {depth: opts.depth + 1, fname: opts.fname}),
+                      compiler(node.alternate, {depth: opts.depth + 1, fname: opts.fname})
+                  ]);
             case "Each":
                 let codeBlock = compiler(node.block, {depth: opts.depth + 2, fname: opts.fname, key: node.key});
-
                 if (node.key)
                     return `
           (() => {
