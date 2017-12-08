@@ -1,6 +1,6 @@
 {
   "name": "pug-musings",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Pug Musings - is a console utility to convert Pug templates to ready to use React components.",
   "repository": {
     "type": "git",

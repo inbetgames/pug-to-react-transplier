@@ -23,6 +23,7 @@ Options:
   --in     Path to the target Pug template                                  
   --out    Path to the output file, stdout will be used if missing
   --watch  If given will start watching for changes, out param is required
+  --no_beautify  Prevent to beautify result
 ```
 
 ## Tests

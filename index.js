@@ -25,9 +25,9 @@ function isArray(arg) {
  * @return {string}
  */
 function subs(template, values) {
-  return template.replace(/%s/g, function() {
-    return values.shift();
-  });
+    return template.replace(/%s/g, function () {
+        return values.shift();
+    });
 }
 
 const transplier = (fname) => {
@@ -224,10 +224,10 @@ const transplier = (fname) => {
                 return "";
             case "Conditional":
                 return subs("((%s) ? function (){return %s;} : function (){return %s;})()", [
-                      node.test,
-                      compiler(node.consequent, {depth: opts.depth + 1, fname: opts.fname}),
-                      compiler(node.alternate, {depth: opts.depth + 1, fname: opts.fname})
-                  ]);
+                    node.test,
+                    compiler(node.consequent, {depth: opts.depth + 1, fname: opts.fname}),
+                    compiler(node.alternate, {depth: opts.depth + 1, fname: opts.fname})
+                ]);
             case "Each":
                 let codeBlock = compiler(node.block, {depth: opts.depth + 2, fname: opts.fname, key: node.key});
                 if (node.key)
@@ -285,6 +285,8 @@ const transplier = (fname) => {
     };
 
     let transformResult = null;
+    let result = null;
+
     try {
         transformResult = transform(fname);
     } catch (e) {
@@ -292,10 +294,12 @@ const transplier = (fname) => {
         error = true;
     }
 
-    let result = transformResult ? "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transformResult : null;
+    if (transformResult) {
+        result = transformResult ? "import React from 'react';\n\n\n" + mixins.join("\n") + "\n" + transformResult : null;
 
-    if (!argv['no_beautify']) {
-      result = beautify(result, { indent_size: 2 });
+        if (!argv['no_beautify']) {
+            result = beautify(result, {indent_size: 2});
+        }
     }
 
     return {
@@ -312,7 +316,7 @@ const argv = optimist
     .describe('in', 'Path to the target Pug template')
     .describe('out', 'Path to the output file, stdout will be used if missing')
     .describe('watch', 'If given will start watching for changes, out param is required')
-    .boolean('no_beautify', 'Prevent to beautify result')
+    .describe('no_beautify', 'Prevent to beautify result')
     .argv;
 
 let watches = {};
