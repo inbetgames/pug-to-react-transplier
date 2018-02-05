@@ -232,22 +232,22 @@ const transplier = (fname) => {
                 let codeBlock = compiler(node.block, {depth: opts.depth + 2, fname: opts.fname, key: node.key});
                 if (node.key)
                     return `
-          (() => {
-            let items = [];
+          (function {
+            var items = [];
             try { items = ${node.obj}; } catch (e) { return null; }
             if (!items) { return null; }
-            return Object.keys(${node.obj}).map(${node.key} => {
-              let ${node.val} = ${node.obj}[${node.key}];
+            return Object.keys(${node.obj}).map(function(${node.key}) {
+              var ${node.val} = ${node.obj}[${node.key}];
               return ${codeBlock.trim()};
             });
           })()`;
                 else
                     return `
-          (() => {
-            let items = [];
+          (function() {
+            var items = [];
            try { items = ${node.obj}; } catch (e) { return null; }
             if (!items) { return null; }
-            return items.map(${node.val} => ${codeBlock.trim()});
+            return items.map(function(${node.val}) { return ${codeBlock.trim()} });
           })()`;
             case "RawInclude":
                 const basepath = path.parse(opts.fname).dir + "/" + node.file.path + ".jade";
@@ -261,7 +261,7 @@ const transplier = (fname) => {
                 } else {
                     let mixin =
                         "// " + node.name + "\n" +
-                        "const " + node.name + " = (" + (node.args === null ? "" : node.args) + ") => [" + compiler(node.block, {depth: 1, fname: opts.fname}) + "]";
+                        "function " + node.name + "(" + (node.args === null ? "" : node.args) + ") { return [" + compiler(node.block, {depth: 1, fname: opts.fname}) + "]; }";
                     if (mixins_defined[node.name] === undefined) {
                         mixins.push(mixin);
                         mixins_defined[node.name] = true;
